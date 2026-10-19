@@ -1,0 +1,49 @@
+@use 'sass:color';
+@use './variables' as *;
+
+@mixin respond-to($bp) {
+  @if $bp == sm {
+    @media (min-width: $bp-sm) {
+      @content;
+    }
+  } @else if $bp == md {
+    @media (min-width: $bp-md) {
+      @content;
+    }
+  } @else if $bp == lg {
+    @media (min-width: $bp-lg) {
+      @content;
+    }
+  } @else if $bp == xl {
+    @media (min-width: $bp-xl) {
+      @content;
+    }
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin card {
+  background: $white;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  padding: $spacing-lg;
+}
+
+@mixin button-variant($bg, $color: $white) {
+  background: $bg;
+  color: $color;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($bg, $lightness: -8%);
+  }
+
+  &:focus-visible {
+    outline: 3px solid $secondary;
+    outline-offset: 2px;
+  }
+}
