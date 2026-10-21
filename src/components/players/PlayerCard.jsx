@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { positionLabel, fullName } from '../../utils/formatters';
 
-export const PlayerCard = ({ player, team, onDelete }) => {
+export const PlayerCard = ({ player, team, onDelete, onEdit }) => {
+  if (!player) return null;
+
   const { id, firstName, lastName, number, position, age, nationality, goals, assists } = player;
 
   return (
@@ -24,14 +26,26 @@ export const PlayerCard = ({ player, team, onDelete }) => {
         <Link to={`/players/${id}`} className="btn btn--primary btn--sm">
           Detalji
         </Link>
-        <button
-          type="button"
-          className="btn btn--danger btn--sm"
-          onClick={() => onDelete(player)}
-          aria-label={`Obriši igrača ${fullName(player)}`}
-        >
-          Obriši
-        </button>
+        {onEdit && (
+          <button
+            type="button"
+            className="btn btn--warning btn--sm"
+            onClick={() => onEdit(player)}
+            aria-label={`Uredi igrača ${fullName(player)}`}
+          >
+            Uredi
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            className="btn btn--danger btn--sm"
+            onClick={() => onDelete(player)}
+            aria-label={`Obriši igrača ${fullName(player)}`}
+          >
+            Obriši
+          </button>
+        )}
       </div>
     </article>
   );

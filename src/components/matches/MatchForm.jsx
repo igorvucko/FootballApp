@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { validateMatch } from '../../utils/validators';
 
-const initialState = {
+const emptyState = {
   homeTeamId: '',
   awayTeamId: '',
   homeScore: 0,
@@ -11,10 +11,26 @@ const initialState = {
   competition: 'HNL'
 };
 
-export const MatchForm = ({ teams = [], onSubmit, onCancel }) => {
-  const [form, setForm] = useState(initialState);
+export const MatchForm = ({ teams = [], onSubmit, onCancel, initial }) => {
+  const [form, setForm] = useState(initial || emptyState);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+
+  useEffect(() => {
+    if (initial) {
+      setForm({
+        homeTeamId: initial.homeTeamId || '',
+        awayTeamId: initial.awayTeamId || '',
+        homeScore: initial.homeScore ?? 0,
+        awayScore: initial.awayScore ?? 0,
+        date: initial.date || '',
+        stadium: initial.stadium || '',
+        competition: initial.competition || 'HNL'
+      });
+    } else {
+      setForm(emptyState);
+    }
+  }, [initial]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,9 +54,7 @@ export const MatchForm = ({ teams = [], onSubmit, onCancel }) => {
     e.preventDefault();
     const validationErrors = validateMatch(form);
     setErrors(validationErrors);
-    setTouched(
-      Object.keys(form).reduce((acc, k) => ({ ...acc, [k]: true }), {})
-    );
+    setTouched(Object.keys(form).reduce((acc, k) => ({ ...acc, [k]: true }), {}));
 
     if (Object.keys(validationErrors).length === 0) {
       onSubmit({

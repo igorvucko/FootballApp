@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useFetch } from '../hooks/useFetch';
 import { matchService } from '../services/matchService';
 import { teamService } from '../services/teamService';
@@ -9,18 +10,19 @@ import { Loader } from '../components/ui/Loader';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../hooks/useAuth';
 import { fullName } from '../utils/formatters';
 
 export const Matches = () => {
   const toast = useToast();
+  const { isLoggedIn } = useAuth();
   const { data: matches, loading, error, refetch } = useFetch(() => matchService.getAll());
   const { data: teams } = useFetch(() => teamService.getAll());
   const { data: players } = useFetch(() => playerService.getAll());
-  const { data: playerMatches, refetch: refetchPM } = useFetch(() =>
-    matchService.getPlayerMatches()
-  );
+  const { refetch: refetchPM } = useFetch(() => matchService.getPlayerMatches());
 
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [toDelete, setToDelete] = useState(null);
   const [linkMatch, setLinkMatch] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -31,11 +33,31 @@ export const Matches = () => {
     return acc;
   }, {});
 
-  const handleSubmit = async (match) => {
+  const openCreate = () => {
+    setEditing(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (match) => {
+    setEditing(match);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
+  };
+
+  const handleSubmit = async (matchData) => {
     try {
-      await matchService.create(match);
-      toast.success('Utakmica je dodana');
-      setShowForm(false);
+      if (editing) {
+        await matchService.update(editing.id, { ...editing, ...matchData });
+        toast.success('Utakmica je uspješno ažurirana');
+      } else {
+        await matchService.create(matchData);
+        toast.success('Utakmica je dodana');
+      }
+      closeForm();
       refetch();
     } catch (err) {
       toast.error(err.message);
@@ -80,18 +102,25 @@ export const Matches = () => {
     <div className="container" style={{ padding: '2rem 1rem' }}>
       <div className="page-header">
         <h1>📊 Utakmice</h1>
-        <button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>
-          + Dodaj utakmicu
-        </button>
+        {isLoggedIn ? (
+          <button type="button" className="btn btn--primary" onClick={openCreate}>
+            + Dodaj utakmicu
+          </button>
+        ) : (
+          <Link to="/login" className="btn btn--secondary">
+            Prijavi se za uređivanje
+          </Link>
+        )}
       </div>
 
-      {showForm && (
+      {showForm && isLoggedIn && (
         <div className="card">
-          <h2>Nova utakmica</h2>
+          <h2>{editing ? 'Uredi utakmicu' : 'Nova utakmica'}</h2>
           <MatchForm
             teams={teams || []}
+            initial={editing}
             onSubmit={handleSubmit}
-            onCancel={() => setShowForm(false)}
+            onCancel={closeForm}
           />
         </div>
       )}
@@ -106,22 +135,24 @@ export const Matches = () => {
                 match={m}
                 homeTeam={teamsMap[m.homeTeamId]}
                 awayTeam={teamsMap[m.awayTeamId]}
-                onDelete={setToDelete}
+                onDelete={isLoggedIn ? setToDelete : undefined}
+                onEdit={isLoggedIn ? openEdit : undefined}
               />
-              <button
-                type="button"
-                className="btn btn--secondary btn--sm"
-                style={{ marginTop: '-0.5rem', marginBottom: '1rem' }}
-                onClick={() => setLinkMatch(m)}
-              >
-                + Igrač na utakmicu (n:n)
-              </button>
+              {isLoggedIn && (
+                <button
+                  type="button"
+                  className="btn btn--secondary btn--sm"
+                  style={{ marginTop: '-0.5rem', marginBottom: '1rem' }}
+                  onClick={() => setLinkMatch(m)}
+                >
+                  + Igrač na utakmicu (n:n)
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Modal za n:n povezivanje igrač ↔ utakmica */}
       {linkMatch && (
         <div
           className="modal-overlay"

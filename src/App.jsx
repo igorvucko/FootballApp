@@ -8,6 +8,8 @@ import { TeamDetail } from './pages/TeamDetail';
 import { Players } from './pages/Players';
 import { PlayerDetail } from './pages/PlayerDetail';
 import { Matches } from './pages/Matches';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { NotFound } from './pages/NotFound';
 
 export default function App() {
@@ -17,11 +19,18 @@ export default function App() {
       <main id="main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:id" element={<TeamDetail />} />
           <Route path="/players" element={<Players />} />
           <Route path="/players/:id" element={<PlayerDetail />} />
           <Route path="/matches" element={<Matches />} />
+
+         
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

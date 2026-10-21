@@ -17,17 +17,25 @@ export const TeamCard = ({ team, playerCount = 0, onDelete, onEdit }) => {
         <Link to={`/teams/${id}`} className="btn btn--primary btn--sm">
           Detalji
         </Link>
-        <button type="button" className="btn btn--warning btn--sm" onClick={() => onEdit(team)}>
-          Uredi
-        </button>
-        <button
-          type="button"
-          className="btn btn--danger btn--sm"
-          onClick={() => onDelete(team)}
-          aria-label={`Obriši klub ${name}`}
-        >
-          Obriši
-        </button>
+        {onEdit && (
+          <button
+            type="button"
+            className="btn btn--warning btn--sm"
+            onClick={() => onEdit(team)}
+          >
+            Uredi
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            className="btn btn--danger btn--sm"
+            onClick={() => onDelete(team)}
+            aria-label={`Obriši klub ${name}`}
+          >
+            Obriši
+          </button>
+        )}
       </div>
     </article>
   );
